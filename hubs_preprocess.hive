@@ -1,0 +1,29 @@
+# John Nguyen - Hubs Delay Analysis Pre-processing
+-- The purpose of this Hive script is pre-processing the large airlines dataset. We load the data into a database,
+-- create some views and then output the views to a .csv file for R
+
+DROP TABLE IF EXISTS airlines;
+
+-- Create a table to store the data
+CREATE TABLE airlines (Yr INT, Mo INT, DayofMonth INT, DayOfWeek INT, DepTime STRING, CRSDepTime STRING,
+                       ArrTime STRING, CRSArrTime STRING, UniqueCarrier STRING, FlightNum STRING, TailNum STRING,
+                       ActualElapsedTime STRING, CRSElapsedTime STRING, AirTime STRING, ArrDelay INT,
+                       DepDelay INT, Origin STRING, Dest STRING,  Distance INT, TaxiIn INT, TaxiOut INT,
+                       Cancelled INT, CancellationCode STRING, Diverted STRING, CarrierDelay STRING,
+                       WeatherDelay STRING, NASDelay STRING, SecurityDelay STRING, LateAircraftDelay STRING)
+                       ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+
+-- Load the airline data into the database
+LOAD DATA LOCAL INPATH '/home/host-data/RDataScience/GroupProject/airlines.csv' OVERWRITE INTO TABLE airlines;
+
+# Create some views to get the output from
+CREATE VIEW depdelay_97 AS SELECT Origin, COUNT(*) as dep_intensity FROM airlines WHERE Yr = '1997' AND DepDelay > 0 GROUP BY Origin;
+CREATE VIEW arrdelay_97 AS SELECT Dest, COUNT(*) as arr_intensity FROM airlines WHERE Yr = '1997' AND ArrDelay > 0 GROUP BY Dest;
+CREATE VIEW depdelay_98 AS SELECT Origin, COUNT(*) as dep_intensity FROM airlines WHERE Yr = '1998' AND DepDelay > 0 GROUP BY Origin;
+CREATE VIEW arrdelay_98 AS SELECT Dest, COUNT(*) as arr_intensity FROM airlines WHERE Yr = '1998' AND ArrDelay > 0 GROUP BY Dest;
+
+-- RUN THE FOLLOWING ON THE COMMAND LINE WITHOUT THE COMMENTS; MIGHT TAKE A WHILE
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from depdelay_97' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/GroupProject/depdelay_97.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from arrdelay_97' | sed 's/[\t]/,/g'  > /home/host-data/RDataScience/GroupProject/arrdelay_97.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from depdelay_98' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/GroupProject/depdelay_98.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from arrdelay_98' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/GroupProject/arrdelay_98.csv

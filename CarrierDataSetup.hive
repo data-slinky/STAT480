@@ -1,0 +1,37 @@
+CREATE TABLE airlines (
+  Year INT, Month INT, DayofMonth INT, DayOfWeek INT, DepTime INT, CRSDepTime INT, ArrTime INT, CRSArrTime INT, UniqueCarrier STRING, FlightNum INT,
+  TailNum STRING, ActualElapsedTime INT, CRSElapsedTime INT, AirTime INT, ArrDelay INT, DepDelay INT, Origin STRING, Dest STRING, Distance INT, TaxiIn INT,
+  TaxiOut INT, Cancelled INT, CancellationCode STRING, Diverted INT, CarrierDelay STRING, WeatherDelay STRING, NASDelay STRING, SecurityDelay STRING, LateAircraftDelay STRING
+  ) 
+  ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' tblproperties("skip.header.line.count"="1");
+
+CREATE TABLE carriers (Code STRING, Description String) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' tblproperties("skip.header.line.count"="1");
+
+
+LOAD DATA INPATH '/user/cloudera/project/AirlineData9798.csv' INTO TABLE airlines;
+LOAD DATA INPATH '/user/cloudera/project/carriers.csv' INTO TABLE carriers;
+
+
+CREATE TABLE carrier AS SELECT SUBSTRING(Code,2, LENGTH(Code)-2) as Code, SUBSTRING(Description,2, LENGTH(Description)-2) as Description FROM carriers;
+
+CREATE TABLE combine AS SELECT airlines.*, carrier.Description FROM airlines LEFT OUTER JOIN carrier ON (airlines.uniquecarrier = carrier.code);
+CREATE TABLE time_carr AS SELECT description, year, month, dayofmonth, COUNT(*) as count FROM combine GROUP BY description, year, month, dayofmonth ORDER BY year, month, dayofmonth;
+CREATE TABLE delay_carr AS SELECT description, SUM(DepDelay) as depdel, SUM(ArrDelay) as arrdel, year, month, dayofmonth FROM combine GROUP BY description, year, month, dayofmonth ORDER BY year, month, dayofmonth;
+
+CREATE TABLE dep_carr_97 AS SELECT MAX(DepDelay) as maxDelay, COUNT(*) as count, description FROM combine WHERE year = '1997' AND DepDelay > 0 GROUP BY description;
+CREATE TABLE arr_carr_97 AS SELECT MAX(ArrDelay) as maxDelay, COUNT(*) as count, description FROM combine WHERE year = '1997' AND arrDelay > 0 GROUP BY description;
+CREATE TABLE dep_carr_98 AS SELECT MAX(DepDelay) as maxDelay, COUNT(*) as count, description FROM combine WHERE year = '1998' AND DepDelay > 0 GROUP BY description;
+CREATE TABLE arr_carr_98 AS SELECT MAX(ArrDelay) as maxDelay, COUNT(*) as count, description FROM combine WHERE year = '1998' AND arrDelay > 0 GROUP BY description;
+
+
+
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from time_carr_97' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/time_carr_97.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from delay_carr' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/delay_carr.csv
+
+
+
+
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from dep_carr_97' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/dep_carr_97.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from arr_carr_97' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/arr_carr_97.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from dep_carr_98' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/dep_carr_98.csv
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from arr_carr_98' | sed 's/[\t]/,/g' > /home/host-data/RDataScience/project/arr_carr_98.csv
