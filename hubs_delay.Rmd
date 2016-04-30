@@ -1,0 +1,31 @@
+---
+title: "Hubs Delay" 
+output: html_document
+---
+
+<a href="http://web.engr.illinois.edu/~jknguye2/delays.html">Home</a>
+
+```{r , message=F, warning=F, echo=F}
+require(knitr)
+source("hub_delay.R")
+```
+
+We will examine which hubs have the most delays. As the airport dataset contains latitude and longitude for each `IATA` coded hubs, we can visualize the hubs' location as an overlay on a map of the U.S. and its territories. Then, using the flight data, `ArrDelay` and `DepDelay`, we count the number of number of arrival and departure delays for each hub.
+
+Using total count to determine the intensity of delay at each hub is inaccurate since hubs have highly different numbers of flights. For example, it is obvious that O'hare has more flights than Honolulu and so it would have a higher number of total delays. Instead, we consider the proportions of delays in terms of quantiles. The interactive figure below shows the hubs delay for 1997.
+
+```{r , message=F, warning=F, echo=F, fig.width=10, fig.height=8}
+plot97
+```
+
+Each point on the map is a hub location and the size of the point corresponds to the quantile of the delays for the hub. You can zoom-in/out, hover your cursor over each point to see details like lat/long, number of of arr/dep delay and the hub name. You can also click on the legend to subset the quantiles to better see the points. Let us also illustrate the 1998 hubs delay.
+
+```{r , message=F, warning=F, echo=F, fig.width=10, fig.height=8}
+plot98
+```
+
+# Analysis
+
+This visualization allows us to easily see airports which have significant changes in delays. For example, if we subset both chart to only show the 2nd quantile, we can easily see that Eagle Regional Hospital in Colorado changed from being in the 1st quantile in 1997 to the 2nd quantile in 1998. There are multiple ways to subset the points to show the changes in delays.
+
+<br><br><div align="right"><a href="#top">Back to top</a></div><br><br>
