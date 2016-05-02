@@ -1,0 +1,159 @@
+---
+title: "Carrier Analysis in 1997 and 1998"
+author: "Min Sup Lee"
+date: "2016.5.4."
+output:
+  html_document:
+    code_folding: hide
+    theme: lumen
+    toc: yes
+    toc_float: yes
+header-includes: \usepackage{amsmath}
+---
+
+<a href="http://web.engr.illinois.edu/~jknguye2/delays.html">Home</a>
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+require(knitr)
+source("Analysis.R")
+```
+
+
+# Introduction
+
+- In this section, we are going to study how different carriers show differences in two types of delay (Arrival and Departure), and flight trend observed in 1997 and 1998.
+\
+\
+
+
+
+# Question
+
+1. Percentage of Arrival and Departure delays of carriers in 1997 and 1998.
+2. Total number of flights of carriers in 1997 and 1998.
+3. Cumulative delay time in minutes of carriers in 1997 and 1998.
+\
+\
+
+
+
+# Analysis
+
+## Delay Percentage v. Carriers
+
+### Delay in 1997
+```{r}
+d97
+```
+\
+\
+
+
+
+### Delay in 1997
+```{r}
+d98
+```
+
+- These plots show the percentage of arrival and departure delays to total number of flights per each carriers. In terms of delay ratio, Trans World Airways LLC shows the lowest percentage of both arrival and departure delays. Slightly higher percentage of delays was observed in 1997 than in 1998. Most carriers tend to show 45-55% of arrival delays in 1997, while showing 40-50% in 1998. Average departure delay percentage of carriers looks similar in both years. Alaska Airlines Inc. had the largest variance between two delay types in 1997 and 1998. \
+\
+
+
+
+## Total number of occurance per each carriers in both years
+
+```{r, message=FALSE}
+treemap(tot_occ,
+              index=c("description"),
+              vSize="count",
+              vColor="count",
+              type="value", draw = TRUE)
+```
+
+- This treemap shows the total number of flights with different carriers in 1997 and 1998. Higher occurance is observed when its color is darker and size is larger, relatively. The most popular carrier was Delta Airlines Inc. with 1.84 million counts.
+\
+\
+
+
+
+## StreamGraph
+
+### Total number of flights, monthly
+```{r}
+st1
+```
+
+- From this graph, we can observe flight trends in monthly time line. In February of both 1997 and 1998, relatively but obvious lower flight number was observed. Relative maximum flights were observed in July and August for both years. 
+\
+\
+
+
+
+### Total Departure Delay
+
+- In this part, the streamgraph for daily data seem to be unclear to analyze. So, we re-organized daily data to monthly data so that they are adequately understandable.
+\
+\
+
+
+
+#### Daily Chart in minutes
+```{r}
+st2
+```
+\
+
+
+#### Monthly Chart in minutes
+```{r}
+# Total departure delays in minutes of each carriers in 1997 and 1998, monthly.
+st3
+```
+
+- The least total departure delay of all carriers was observed in September 1997 and 1998, and in November 1998, while the largest total departure delay of all carriers was in June, 1998.
+\
+\
+
+
+
+### Total Arrival Delay
+
+#### Daily Chart in minutes
+```{r}
+# Total arrival delays in minutes of each carriers in 1997 and 1998, daily.
+st4
+```
+\
+\
+
+
+#### Monthly Chart in minutes
+```{r}
+# Total arrival delays in minutes of each carriers in 1997 and 1998, monthly.
+st5
+```
+
+- Similarly, the least total arrival delay of all carriers was observed in September 1997 and 1998, and November 1998. The largest total arrival delay of all carriers was in June, 1998. Since departure delay is directly related to arrival delay, it is logically acceptable that both types of delay occured in similar pattern.
+\
+\
+
+
+
+# Conclusion
+
+1. Carrier with...
+    + the highest arrival delay in 1997 is Alaska Airlines Inc. with 60.17% percentage.
+    + the highest departure delay in 1997 is United Air Lines Inc. with 55.5% percentage.
+    + the highest arrival delay in 1998 is Alaska Airlines Inc. with 63.69% percentage.
+    + the highest arrival delay in 1998 is Alaska Airlines Inc. with 51.73% percentage.
+    + the most records in 1997 and 1998 is Delta Air Lines Inc. with 1.84 million observations.
+
+2. Month with...
+    + the highest total delays in 1997 is January, and in 1998 is June.
+    + the lowest total delays in 1997 is September, and in 1998 is September as well.
+
+
+
+
+<br><br><div align="right"><a href="#top">Back to top</a></div><br><br>
+
