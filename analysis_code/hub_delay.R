@@ -60,7 +60,7 @@ theme2 <- list(scope = 'usa', projection = list(type = 'albers usa'), showland =
 
 plot97 <- plot_ly(hubs_data97, lon = long, lat = lat, text = hover,
         marker = list(size = sqrt(total_intensity/250) + 1),
-        color = quant, colors = "Spectral", type = 'scattergeo', locationmode = 'USA-states') %>%
+        color = quant, type = 'scattergeo', locationmode = 'USA-states') %>%
         layout(geo = theme1, title="Flight Hubs Delay - 1997 <br> Hover for Detail or Click Legend to Subset",
         titlefont = list(family = "Arial, sans-serif", size = 16, color = "gray"))
 
