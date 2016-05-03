@@ -1,0 +1,181 @@
+---
+title: "Relationship between Airtime/Distance and Aircraft"
+author: "Jui-Ting (Tim) Hsu jhsu10@illinois.edu"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+---
+
+<a href="http://web.engr.illinois.edu/~jknguye2/delays.html">Home</a>
+
+
+
+#Introduction
+We examined the relationship between flights statistics with the statistics of the plane they flew in. Some of the most variables considered were the manufacturer of the plane, the model of the plane, the model year of the plane (the year when it was produced), the aircraft type, and the engine type.  
+
+#Objectives
+1. Biggest names in the airline industry
+2. Types and models of planes
+3. Delay and aircraft manufacturers
+
+#Analysis
+##Preprocessing
+Data was merged using hive and output as a CSV file. Now I read it in R. I also renamed the columns because when it was wrote to csv with Hive, the column names all had the table name as the prefix.   
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+library(plotly)
+# get flights data
+airlines_delay = read.csv("airlines_merged.csv", sep = "\t")
+# rename columns
+colnames(airlines_delay) = c("year", "month", "dayOfMonth", "flightNum", "tailNum", "arrDelay",
+                       "depDelay", "airtime", "distance", "cancelled", "type", "manufacturer", 
+                       "issue_date", "model", "status", "aircraft_type", "engine_type", 
+                       "model_year")
+```
+
+Some more cleaning on the data is required. I removed observations with missing values that were labeled as 'None' instead of the typical NA in R. Cancelled flights were removed because they did not have a delay value.  
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+# remove observation with missing values
+airlines_delay[airlines_delay=="None"] = NA
+airlines_delay = na.omit(airlines_delay)
+library(data.table)
+airlines_delay = data.table(airlines_delay)
+```
+
+Hive wrote all the values as strings no matter if they are string or not, so I converted variables that should be numbers back to numeric. Also, I called factors on every factor columns to make sure the levels of the factors are right, since some observations were removed.  
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+# convert model to numeric 
+airlines_delay$model_year = as.numeric(as.character(airlines_delay$model_year)) 
+airlines_delay$arrDelay = as.numeric(as.character(airlines_delay$arrDelay))
+airlines_delay$depDelay = as.numeric(as.character(airlines_delay$depDelay))
+airlines_delay$airtime = as.numeric(as.character(airlines_delay$airtime))
+airlines_delay$distance = as.numeric(as.character(airlines_delay$distance))
+airlines_delay = airlines_delay[airlines_delay$model_year < 1998]
+
+airlines_delay$type = factor(airlines_delay$type)
+airlines_delay$manufacturer = factor(airlines_delay$manufacturer)
+airlines_delay$model = factor(airlines_delay$model)
+airlines_delay$status = factor(airlines_delay$status)
+airlines_delay$aircraft_type = factor(airlines_delay$aircraft_type)
+airlines_delay$engine_type = factor(airlines_delay$engine_type)
+
+airlines_delay = na.omit(airlines_delay)
+```
+
+##Number of Flights by Manufacturers
+I grouped the dataset by the manufacturer of the plane of the flights and compared the total number of flights operated on plane by each manufacturer. 
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+# count of flights group by manufacturer
+numFlightCountByManufacturer = airlines_delay[, length(arrDelay), by=manufacturer]
+colnames(numFlightCountByManufacturer) = c("manufacturer", "count")
+# sort and display
+numFlightCountByManufacturer = numFlightCountByManufacturer[order(numFlightCountByManufacturer$count, decreasing = TRUE),]
+numFlightCountByManufacturer
+# bar plot
+plot_ly(x = numFlightCountByManufacturer$manufacturer,
+        y = numFlightCountByManufacturer$count,
+        orientation = "v",
+        type = "bar") %>%
+  layout(xaxis = list(title = "Manufacturer"), yaxis = list(title = "Flights operated on plane by manufacturer"), margin = list(b = 100))
+# treemap
+library(treemap)
+treemap(numFlightCountByManufacturer, 
+        index = "manufacturer",
+        vSize = "count", 
+        title = "Tree Map of Flight Counts Grouped by Manufacturers")
+```
+As you can see from the plots, Boeing has the most number of flights. McDonnell Douglas follows. Note that there are actually four bars that all resembles McDonnell Douglas including "McDonnell Douglas", "McDonnell Douglas Aircraft Co", "Douglas", and "McDonnell Douglas Corporation".    
+
+
+##Total Distance Traveled by Planes of Manufacturer
+I did the same thing but this time with flight distance.  
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+distanceByManufacturer = airlines_delay[which(airlines_delay$cancelled==0), sum(distance), by=manufacturer]
+distanceByManufacturer = distanceByManufacturer[order(distanceByManufacturer$V1), ]
+plot_ly(x = distanceByManufacturer$V1,
+        y = distanceByManufacturer$manufacturer,
+        orientation = "h",
+        type = "bar") %>%
+  layout(xaxis = list(title = "Distance Traveled by Manufacturer"), yaxis = list(title = "Manufacturer"), margin = list(l = 160))
+```  
+The distribution of the total distance traveled by planes of manufacturer is similar to that of total flights, as expected. 
+
+
+##Average Delay by Planes 
+Once again, I grouped the flights by the manufacturers of the plane they operated on. This time, I computed their average arrival delay. 
+```{r}
+# arrival delay
+avgArrDelayByManufacturer = airlines_delay[which(airlines_delay$cancelled==0), mean(arrDelay), by=manufacturer]
+colnames(avgArrDelayByManufacturer) = c("manufacturer", "avgArrDelay")
+# departure delay
+avgDepDelayByManufacturer = airlines_delay[which(airlines_delay$cancelled==0), mean(depDelay), by=manufacturer]
+colnames(avgDepDelayByManufacturer) = c("manufacturer", "avgDepDelay")
+
+# sort
+avgArrDelayByManufacturer = avgArrDelayByManufacturer[order(avgArrDelayByManufacturer$avgArrDelay, decreasing = TRUE), ]
+avgDepDelayByManufacturer = avgDepDelayByManufacturer[order(avgDepDelayByManufacturer$avgDepDelay, decreasing = TRUE), ]
+avgArrDelayByManufacturer
+avgDepDelayByManufacturer
+p = plot_ly(x = avgArrDelayByManufacturer$manufacturer,
+        y = avgArrDelayByManufacturer$avgArrDelay,
+        orientation = "v",
+        name = "Arrival Delay",
+        type = "bar") 
+add_trace(p, x = avgDepDelayByManufacturer$manufacturer,
+        y = avgDepDelayByManufacturer$avgDepDelay,
+        orientation = "v",
+        name = "Departure Delay",
+        type = "bar") %>%
+  layout(xaxis = list(title = "Manufacturer"), yaxis = list(title = "Average arrival delay"), title = "Average delay of flights operated on plane of aircraft type", margin = list(b = 200))
+```  
+One thing to note is that Boeing, although having the most count of flights by far, was not ranked first in average arrival delay. Their quality did not drop albeit the extreme lead in quantity. Good job Boeing!  
+
+##Number of Flights by plane model and aircraft type
+I compared the number of flights operated by planes considering their plane models and aircraft types. 
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+numFlightCountByModel = airlines_delay[, length(arrDelay), by=model]
+colnames(numFlightCountByModel) = c("model", "count")
+treemap(numFlightCountByModel, 
+        index = "model",
+        vSize = "count", 
+        title = "Tree Map of Flight Counts Grouped by Model")
+numFlightCountByAircraftType = airlines_delay[, length(arrDelay), by=aircraft_type]
+colnames(numFlightCountByAircraftType) = c("aircraft_type", "count")
+# bar plot
+plot_ly(x = numFlightCountByAircraftType$aircraft_type,
+        y = numFlightCountByAircraftType$count,
+        orientation = "v",
+        type = "bar") %>%
+  layout(xaxis = list(title = "Aircraft Type"), yaxis = list(title = "Flights operated on plane of aircraft type"))
+```
+Rotorcrafts the least because they are helicopters. Most rotorcrafts are rarely seen. Instead of a tree map, a bar plot was shown for the aircraft type plot because fixed wing multi-engine, the most common aircraft type, takes up too big of a proportion (98.8%).
+
+##Number of plane models by aircraft type
+I grouped the number of plane models by aircraft type to see what plane models were most common for each aircraft types. 
+```{r message=FALSE, warning=FALSE, cache=FALSE}
+modelByAircraftType = airlines_delay[, length(arrDelay), by=c("aircraft_type", "model")]
+colnames(modelByAircraftType) = c("aircraft_type", "model", "model_count")
+treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Fixed Wing Multi-Engine", ], 
+        index = c("aircraft_type", "model"),
+        vSize = "model_count", 
+        type = "index")
+treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Fixed Wing Single-Engine", ], 
+        index = c("aircraft_type", "model"),
+        vSize = "model_count", 
+        type = "index")
+treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Rotorcraft", ], 
+        index = c("aircraft_type", "model"),
+        vSize = "model_count", 
+        type = "index")
+        #title = "Tree Map of Model Counts Grouped by Aircraft Types")
+counts = table(airlines_delay$model, airlines_delay$aircraft_type)
+```
+I separated the treemaps according to the aircraft type because otherwise fixed wing multi-engine would make the other two aircraft types too hard to see. The most popular model of fixed wing multi-engine is the MD-88; the most popular model of fixed wing single-engine is the FALCON XP. As for rotorcraft, only one model is found: 206B.  
+
+#Conclusion  
+1. Boeing-produced planes flew the most combined distance and the most flights, so either Boeing planes are really durable or they produced a lot more planes. Given the huge difference, I would conclude that the latter is more likely.  
+2. Rotorcrafts are very seldom seen in registered flights since they are helicopters.  
+3. Almost all (98.8%) of the flights flew in fixed-wing multi engine planes.
+4. Airbus planes causes the most arrival delay (in minutes) on average. Boeing, despite resulting in much more flights, ranked #2. There is also a trend that the lesser planes a manufacturer produces, the less delay it causes. 
