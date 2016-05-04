@@ -1,0 +1,168 @@
+---
+title: "Cancelled Flights"
+author: "Rong Du"
+date: "5/4/2016"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+---
+
+<a href="http://web.engr.illinois.edu/~jknguye2/delays.html">Home</a>
+
+
+
+### Introduction
+
+In this section, I mainly focus on the study of flight cancellation during year 1997 and 1998.
+
+
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Preparation Code
+
+setwd("~/container-data/project")
+library(ggplot2)
+library(treemap)
+library(dplyr)
+library(graphics)
+library(grDevices)
+library(plotly)
+library(gridExtra)
+
+# Create Cancel Data
+
+cancelmday <- read.csv("cancel_mday.csv", header = TRUE, sep = ',')
+colnames(cancelmday) <- c("year","month","dayofmonth","dayofweek","numcancel","numflight")
+cancelmday$ratio <- cancelmday$numcancel/cancelmday$numflight
+cancelmday$year <- as.factor(cancelmday$year)
+
+```
+
+
+
+
+
+
+### Questions
+
+**(1)** **What are the differences between 1997 and 1998 in terms of flight cancellation?**
+
+**(2)** **Which months are prone to more cancel? What about day of week?**
+
+
+I applied Hive to calculate the number of cancelled flights each day for the two years and would like to see the cancellation distribution for different months, day of week. Meanwhile, make comparison between years.
+
+Several visualization plots well summarizes the above question.
+
+
+
+### Analysis
+
+**(1)** **Distribution of months' cancel in two years**
+
+```{r, warning = FALSE, message = FALSE}
+
+(violin_cancel <- ggplot(cancelmday, aes(x = as.factor(month), y = numcancel, fill = year)) +
+                       geom_violin(position = position_dodge(width = 0.4)) + 
+                       geom_boxplot(aes(fill = as.factor(year)), width = 0.1, position = position_dodge(width = 0.4)) +
+                       labs(title = "Number of cancelled flights by month", x = "Month", y = "Number") +
+                       scale_fill_brewer(palette="Dark2") + theme_minimal() + 
+                       scale_x_discrete(labels = c("Jan","Feb","Mar","Apri","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")))
+```
+
+Based on the violin plot and its inside boxplot, we take a look at the density of cancelled flights. Apart from January, April and July, 1998 have clearly more cancelled flights than 1997. Generally, two years have similar cancellation conditions in a specific month. But during the summer(June, August and September) both years have extremely high cancellation rates. Such extremety also happen in winter time (January and February). Comparatively, spring seasons lead to the least cancellation.
+
+\
+
+**(2)** **Number of cancellation in two years with month measurement**
+
+```{r, warning = FALSE, message = FALSE}
+bar_cancel <- ggplot(cancelmday, aes(x = as.factor(month), y = numcancel, fill = year)) +
+                     stat_summary(fun.y = sum, position = position_dodge(), geom = "bar") +
+                     labs(title = "Cancel flights comparison", x = "Month", y = "Number" ) +
+                     scale_fill_brewer(palette="Greens") + theme_minimal() +
+                     scale_x_discrete(labels = c("Jan","Feb","Mar","Apri","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
+ggplotly(bar_cancel)
+```
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+treemap(cancelmday,
+                    index=c("year", "month"),
+                     vSize="numcancel",
+                     vColor="numcancel",
+                     title.legend = "Count",
+                     title = "Number of cancelled flights",
+                     type="value",
+                     command.line.output = FALSE)
+```
+
+
+Considering the overall number of cancelled flights rather than density, there is still an increase trend from 1997 to 1998. Concerning months, September, January and August still stands out.
+
+\
+
+**(3)** **Heat Map of cancellation**
+
+```{r, warning = FALSE, message = FALSE}
+
+# separate cancel data in two years
+cancel1997 <- cancelmday[cancelmday[,1]==1997,c(1,2,4,7)]
+cancel1997$month <- as.factor(cancel1997$month)
+cancel1997$dayofweek <- as.factor(cancel1997$dayofweek)
+
+cancel1998 <- cancelmday[cancelmday[,1]==1998,c(1,2,4,7)]
+cancel1998$month <- as.factor(cancel1998$month)
+cancel1998$dayofweek <- as.factor(cancel1998$dayofweek)
+```
+
+
+```{r, warning = FALSE, message = FALSE}
+base_size <- 15
+
+rate1997 <- ggplot(cancel1997, aes(month, dayofweek)) + geom_tile(aes(fill = ratio), colour = "white") + 
+  scale_fill_gradient(low = "white",high = "red") +  theme_grey(base_size = base_size) + 
+  labs(x = "Month", y = "Day of Week") + 
+  scale_x_discrete(labels = c("Jan","Feb","Mar","Apri","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")) + 
+  scale_y_discrete(labels = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")) +
+  ggtitle("1997") + theme(legend.position="none") +
+  theme(axis.text.x=element_text(size=8))
+
+rate1998 <- ggplot(cancel1998, aes(month, dayofweek)) + geom_tile(aes(fill = ratio), colour = "white") + 
+  scale_fill_gradient(low = "white",high = "red") +  theme_grey(base_size = base_size) + 
+  labs(x = "Month", y = "Day of Week") + 
+  scale_x_discrete(labels = c("Jan","Feb","Mar","Apri","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")) + 
+  scale_y_discrete(labels = c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")) + 
+  ggtitle("1998") + theme(legend.position="none") +
+  theme(axis.text.x=element_text(size=8))
+
+grid.arrange(rate1997, rate1998, ncol = 2, top = "Cancel Rates")
+```
+
+ I basically suggest that cancelled flights itself does not speak as powerfully as the cancellation rates because the high number of cancelled flights might due to the total large number of flights. 
+
+As  a result of this idea, I came up withe the heat maps with x-axis months and y-axis day of week. Color indicates cancellation ratio. 
+
+There is a little surprise that it is not completely in agreement with the above plots. In 1997, the highest cancellation rates appear in October instead of August. For 1998, there's not much conflict. The greatest cancel are usually at weekends when it comes to day of week. However in 1998, Monday suffer large cancellation ratio as well.
+
+
+### Conclusions
+
+**(1)** **Cancellation trend between years**
+
+The number of canceled flights generally increase from 1997 to 1998 and cancellation rates go up meanwhile. It is a possible reason of the strenghened effect of "1997–98 El Niño event" (Wiki-pedia).
+
+
+**(2)** **Canceled flight numbers for months**
+
+September and January have extreme number of canceled flight for 1997. High peaks of cancellation exist also during August and June in 1998. 
+
+**(3)** **Flight cancel rates measured by month and day of week**
+
+In 1997, October and January have the hugest cancel rates however August, June and September result in the greatest cancel rates in 1998. Both years have canceling rates the higest at weekends. 1998 sees Monday's cancellation peak.
+
+\
+<br><br><div align="right"><a href="#top">Back to top</a></div><br><br>
