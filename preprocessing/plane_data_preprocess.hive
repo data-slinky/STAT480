@@ -1,0 +1,37 @@
+--create table for airlines
+CREATE TABLE airlines (year STRING, month STRING, dayOfMonth STRING, dayOfWeek STRING, depTime int, crsDepTime int, arrTime int, crsArrTime int, 
+uniqueCarrier STRING, flightNum STRING, tailNum STRING, actualElapsedTime int, crsElapsedTime int, airTime int, arrDelay int, depDelay int, origin STRING, dest STRING,
+distance int, taxiIn int, taxiOut int, cancelled int, cancellationCode STRING, diverted int, carrierDelay int, weatherDelay int, nasDelay int, securityDelay int,
+lateAircraftDelay int)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+tblproperties("skip.header.line.count"="1");
+
+--read data from csv file
+LOAD DATA LOCAL INPATH 'project/airlines.csv'
+INTO TABLE airlines;
+
+--only get columns we want
+CREATE VIEW airlines_less AS
+SELECT year, month, dayOfMonth, flightNum, tailNum, arrDelay, depDelay, cancelled 
+FROM airlines;
+
+--create table for plane data
+CREATE TABLE plane_data (tail_Num STRING, type STRING, manufacturer STRING, issue_date STRING, model STRING, status STRING, aircraft_type STRING, engine_type STRING,
+year STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+tblproperties("skip.header.line.count"="1");
+--read from csv
+LOAD DATA LOCAL INPATH 'project/plane-data.csv'
+INTO TABLE plane_data;
+
+--join plane data with airlines data
+CREATE VIEW airlines_merged AS
+SELECT airlines_less.*, type, manufacturer, issue_date, model, status, aircraft_type, engine_type, plane_data.year AS model_year
+FROM airlines_less LEFT OUTER JOIN plane_data ON (airlines_less.tailNum = plane_data.tailNum);
+
+--write to file (run at terminal)
+--hive -e 'SET hive.cli.print.header=true; select books from table' > /home/host-data/project/airlines_merged.csv
