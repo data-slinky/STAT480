@@ -72,7 +72,6 @@ numFlightCountByManufacturer = airlines_delay[, length(arrDelay), by=manufacture
 colnames(numFlightCountByManufacturer) = c("manufacturer", "count")
 # sort and display
 numFlightCountByManufacturer = numFlightCountByManufacturer[order(numFlightCountByManufacturer$count, decreasing = TRUE),]
-numFlightCountByManufacturer
 # bar plot
 plot_ly(x = numFlightCountByManufacturer$manufacturer,
         y = numFlightCountByManufacturer$count,
@@ -85,7 +84,7 @@ treemap(numFlightCountByManufacturer,
         index = "manufacturer",
         vSize = "count", 
         title = "Tree Map of Flight Counts Grouped by Manufacturers")
-```
+```  
 As you can see from the plots, Boeing has the most number of flights. McDonnell Douglas follows. Note that there are actually four bars that all resembles McDonnell Douglas including "McDonnell Douglas", "McDonnell Douglas Aircraft Co", "Douglas", and "McDonnell Douglas Corporation".    
 
 
@@ -116,8 +115,6 @@ colnames(avgDepDelayByManufacturer) = c("manufacturer", "avgDepDelay")
 # sort
 avgArrDelayByManufacturer = avgArrDelayByManufacturer[order(avgArrDelayByManufacturer$avgArrDelay, decreasing = TRUE), ]
 avgDepDelayByManufacturer = avgDepDelayByManufacturer[order(avgDepDelayByManufacturer$avgDepDelay, decreasing = TRUE), ]
-avgArrDelayByManufacturer
-avgDepDelayByManufacturer
 p = plot_ly(x = avgArrDelayByManufacturer$manufacturer,
         y = avgArrDelayByManufacturer$avgArrDelay,
         orientation = "v",
@@ -157,22 +154,12 @@ I grouped the number of plane models by aircraft type to see what plane models w
 ```{r message=FALSE, warning=FALSE, cache=FALSE}
 modelByAircraftType = airlines_delay[, length(arrDelay), by=c("aircraft_type", "model")]
 colnames(modelByAircraftType) = c("aircraft_type", "model", "model_count")
-treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Fixed Wing Multi-Engine", ], 
-        index = c("aircraft_type", "model"),
-        vSize = "model_count", 
-        type = "index")
-treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Fixed Wing Single-Engine", ], 
-        index = c("aircraft_type", "model"),
-        vSize = "model_count", 
-        type = "index")
-treemap(modelByAircraftType[modelByAircraftType$aircraft_type=="Rotorcraft", ], 
-        index = c("aircraft_type", "model"),
-        vSize = "model_count", 
-        type = "index")
-        #title = "Tree Map of Model Counts Grouped by Aircraft Types")
-counts = table(airlines_delay$model, airlines_delay$aircraft_type)
+plot_ly(labels = modelByAircraftType[aircraft_type=="Fixed Wing Multi-Engine"]$model, values = modelByAircraftType[aircraft_type=="Fixed Wing Multi-Engine"]$model_count, type = "pie", hole = 0.6, domain = list(x = c(0, 0.4), y = c(0.4, 1)), textinfo = "none") %>%
+  add_trace(labels = modelByAircraftType[aircraft_type=="Fixed Wing Single-Engine"]$model, values = modelByAircraftType[aircraft_type=="Fixed Wing Single-Engine"]$model_count, type = "pie", hole = 0.6, domain = list(x = c(0.6, 1), y = c(0.4, 1)), textinfo = "none") %>%
+  add_trace(labels = modelByAircraftType[aircraft_type=="Rotorcraft"]$model, values = modelByAircraftType[aircraft_type=="Rotorcraft"]$model_count, type = "pie", hole = 0.6, domain = list(x = c(0.25, 0.75), y = c(0, 0.6)), textinfo = "none") %>%
+  layout(title = "Pie Charts of Model Counts of Each Aircraft Types")
 ```
-I separated the treemaps according to the aircraft type because otherwise fixed wing multi-engine would make the other two aircraft types too hard to see. The most popular model of fixed wing multi-engine is the MD-88; the most popular model of fixed wing single-engine is the FALCON XP. As for rotorcraft, only one model is found: 206B.  
+I separated the pie charts according to the aircraft type because otherwise fixed wing multi-engine would make the other two aircraft types too hard to see. The most popular model of fixed wing multi-engine is the MD-88; the most popular model of fixed wing single-engine is the FALCON XP. As for rotorcraft, only one model is found: 206B.  
 
 #Conclusion  
 1. Boeing-produced planes flew the most combined distance and the most flights, so either Boeing planes are really durable or they produced a lot more planes. Given the huge difference, I would conclude that the latter is more likely.  
