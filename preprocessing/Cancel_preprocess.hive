@@ -1,0 +1,35 @@
+------------------ Preparation ------------------
+- read in data
+-- cd ~/container-data
+
+- get script file for data readingg
+-- wget https://raw.githubusercontent.com/coatless/stat490uiuc/master/airlines/airlines_data.sh
+
+-- chmod u+x airlines_data.sh
+
+-- ./airlines_data.sh 1997 1998
+
+-- move airlines.csv to newly created folder project
+-- launch hive
+
+------------------ Cancelled Flights Each Day ------------------
+-- create airlines table
+
+CREATE TABLE airlines (year INT, montg INT, dayofmonth INT, dayofweek INT, deptime INT, crsdeptime INT,
+                       ARRTIME INT, crsarrtime INT, uniquecarrier STRING, flightnum STRING, tailnum STRING,
+                       actualelapsedtime INT, crselapsedtime INT, airTime INT, arrdelay INT,
+                       depdelay INT, origin STRING, dest STRING, distance INT, taxiin INT, taxiout INT,
+                       cancelled INT, cancellationcode STRING, diverted INT, carrierdelay INT,
+                       weatherdelay INT, nasdelay INT, securitydelay INT, lateaircraftdelay INT)
+                       ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INPATH 'project/airlines.csv' INTO TABLE airlines;
+
+-- calculate cancel each day of month for two years
+
+CREATE VIEW cancel_mday AS
+SELECT year, month, dayOfMonth, dayOfWeek, SUM(cancelled) AS
+mdcancel, COUNT(*) AS numflight FROM airlines
+GROUP BY year, month, dayOfMonth, dayOfWeek
+ORDER BY year ASC, month ASC, dayOfMonth ASC;
+
+-- hive -e 'SET hive.cli.print.header=true; SELECT * from cancel_mday' | sed 's/[\t]/,/g' > /home/host-data/project/cancel_mday.csv
