@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		
+				
+		<!-- metadata -->
+		<meta property="og:url" content="http://web.engr.illinois.edu/~jknguye2/delays.html" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="STAT480 - Group 3" />
+		<meta property="og:description" content="What affects flight delays and cancellations?" />
+		<meta property="og:image" content="http://web.engr.illinois.edu/~jknguye2/images/bokeh_car_lights_bg.jpg" />
+	
+		<meta charset="UTF-8">
+		<title>Flight Delays and Cancellations</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<script src="js/jquery.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-xlarge.css" />
+		</noscript>
+		
+	</head>
+	<body class="landing">
+
+		<!-- Header -->
+
+		<!-- Banner -->
+			<section id="banner">
+				<h2>What affects flight delays and cancellations?</h2>
+				<p>University of Illinois at Urbana-Champaign<br>STAT 480 - Project Group 3</p>
+			</section>
+
+		<!-- One -->
+			<section id="one" class="wrapper style special">
+				<div class="container">
+					<header class="major">
+						<h2>Data</h2>
+						<p>
+						<a href="http://www.transtats.bts.gov/OT_Delay/NewAirportList.asp?xpage=OT_DelayCause1.asp&flag=undefined">BTS 97-98 Flights data</a> +
+						<a href="http://www.transtats.bts.gov/Download_Lookup.asp?Lookup=L_UNIQUE_CARRIERS">BTS Carriers data</a> +
+						<a href="http://openflights.org/data.html">OpenFlights airports data</a> +
+						<a href="http://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download/">FAA aircraft data</a>
+						</p>
+					</header>
+					<header class="major">
+						<h2>Analysis</h2>
+						<p>As any frequent flier knows, flight delays and cancellations are an inevitable part of commercial air travel.<br>
+						We want to see if there are any particular trends with flight delays and cancellations using a variety of air <br>
+						travel data. Using Hive, a data warehouse built atop Hadoop, we pre-process the data to select the relevant<br>
+						information	to feed into R. The analytics is presented visually to better identify patterns and trends. We <br>
+						partition the analysis into four categories. Click the icons below for an in-depth look.
+						</p>
+					</header>
+					<div class="features">
+						<div class="3u 12u$(medium)">
+							<section class="box">
+								<a href="Carrier_Analysis.html" class="icon big rounded color0 fa-plane"></a>
+								<h3>Carriers</h3>
+								<p>Does American Airline have more delays than Southwest?</p>
+							</section>
+						</div>
+						<div class="3u 12u$(medium)">
+							<section class="box">
+								<a href="hubs_delay.html" class="icon big rounded color0 fa-map-marker"></a>
+								<h3>Hubs</h3>
+								<p>Is O'hare really America's worst airport?</p>
+							</section>
+						</div>
+						<div class="3u$ 12u$(medium)">
+							<section class="box">
+								<a href="aircraft_analysis.html" class="icon big rounded color0 fa-cog"></a>
+								<h3>Aircraft</h3>
+								<p>Are older planes more likely to cause delays?</p>
+							</section>
+						</div>
+							<div class="3u$ 12u$(medium)">
+							<section class="box">
+								<a href="cancel.html" class="icon big rounded color0 fa-close"></a>
+								<h3>Cancellations</h3>
+								<p>What happens when a delay turns into a cancellation?</p>
+							</section>
+						</div>
+						<section>
+						<ul class="actions">
+							<li>
+							<br>
+								<a href="https://github.com/jknguye2/STAT480.git" class="button big">Get the code!</a>
+							</li>
+						</ul>
+					</section>
+					</div>
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="wrapper style2 special">
+				<div class="container">
+					<section class="profiles">
+						<div class="row">
+							<section class="3u 6u(medium) 12u$(xsmall) profile">
+								<img src="images/minsup.jpg" alt="" height="92" width="92" />
+								<h4>Minsup Lee</h4>
+								<p>Carriers<br><a href="mailto:leeminsup1989@gmail.com">Contact</a></p>
+							</section>
+							<section class="3u 6u$(medium) 12u$(xsmall) profile">
+								<img src="images/john.jpg" alt="" height="92" width="92"/>
+								<h4>John Nguyen</h4>
+								<p>Hubs + Webmaster<br><a href="mailto:jknguye2@illinois.edu">Contact</a></p>
+							</section>
+							<section class="3u 6u(medium) 12u$(xsmall) profile">
+								<img src="images/tim.jpg" alt="" height="92" width="92" />
+								<h4>Tim Hsu</h4>
+								<p>Aircraft<br><a href="mailto:timhsu1994@gmail.com">Contact</a></p>
+							</section>
+							<section class="3u$ 6u$(medium) 12u$(xsmall) profile">
+								<img src="images/rong.jpg" alt="" height="92" width="92" />
+								<h4>Rong Du</h4>
+								<p>Cancellations<br><a href="mailto:rongdu2@illinois.edu">Contact</a></p>
+							</section>
+						</div>
+					</section>
+
+				</div>
+			</section>
+
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="container">
+					<section class="links">
+						<div class="row">
+
+						</div>
+					</section>
+					<div class="row">
+						<div class="8u 12u$(medium)">
+							<ul class="copyright">
+								<li>&copy; All rights reserved.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</footer>
+
+	</body>
+</html>
